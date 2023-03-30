@@ -2,10 +2,25 @@ import * as trpcNext from '@trpc/server/adapters/next';
 import { z } from 'zod';
 import { ApiResponse } from '~/models/ApiResponse';
 import { Message } from '~/models/Message';
+import { SortType, SortTypeOrder } from '~/models/Sorts';
 import { db } from '~/server/db';
 import { publicProcedure, router } from '~/server/trpc';
 
+
 const appRouter = router({
+  "msg.delete": publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await db.messages.delete({
+        where: { id: input.id }
+      })
+      const response: ApiResponse = { success: true }
+      return response
+    }),
   "msg.add": publicProcedure
     .input(
       z.object({
@@ -22,14 +37,29 @@ const appRouter = router({
   "msg.list": publicProcedure
     .input(
       z.object({
-        name: z.string().nullish(),
+        sortingBy:
+          z.enum([SortType.ByCreatedAt, SortType.ByText]),
+        order:
+          z.enum([SortTypeOrder.Ascending, SortTypeOrder.Descending]),
       }),
     )
     .query(async ({ input }) => {
-      const messages = await db.messages.findMany()
+      const orderByAttr: any = (() => {
+        const order: string =
+          input.order === SortTypeOrder.Ascending ? "asc" : "desc"
+        if (input.sortingBy === SortType.ByCreatedAt) {
+          return { createdAt: order }
+        }
+        return { desc: order }
+      })()
+
+      const messages = await db.messages.findMany({
+        orderBy: [orderByAttr]
+      })
       const result: Message[] = messages.map((message) => ({
         desc: message.desc || "",
-        createdAt: message.createdAt.toISOString()
+        createdAt: message.createdAt.toISOString(),
+        id: message.id
       }))
       return result
     }),

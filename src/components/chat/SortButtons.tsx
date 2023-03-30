@@ -3,12 +3,14 @@ import { SortType, SortTypeOrder } from "~/models/Sorts"
 
 
 interface IProps {
+  sortType: SortType
+  order: SortTypeOrder
   onSubmit(sortType: SortType, order: SortTypeOrder): void
 }
 
-function SortButtons({ onSubmit }: IProps) {
-  const [selectedOrder, setSelectedOrder] = useState(SortTypeOrder.Ascending)
-  const [selectedType, setSelectedType] = useState(SortType.ByCreatedAt)
+function SortButtons({ sortType, order, onSubmit }: IProps) {
+  const [selectedOrder, setSelectedOrder] = useState(order)
+  const [selectedType, setSelectedType] = useState(sortType)
 
   const onClickButton = (myType: SortTypeOrder) => {
     setSelectedOrder(myType)
