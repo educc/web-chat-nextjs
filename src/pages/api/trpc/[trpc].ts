@@ -1,12 +1,37 @@
-/**
- * This is the API-handler of your app that contains all your API routes.
- * On a bigger app, you will probably want to split this file up into multiple files.
- */
 import * as trpcNext from '@trpc/server/adapters/next';
 import { z } from 'zod';
+import { ApiResponse } from '~/models/ApiResponse';
+import { Message } from '~/models/Message';
+import { db } from '~/server/db';
 import { publicProcedure, router } from '~/server/trpc';
 
 const appRouter = router({
+  "msg.add": publicProcedure
+    .input(
+      z.object({
+        desc: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await db.messages.create({
+        data: { desc: input.desc }
+      })
+      const response: ApiResponse = { success: true }
+      return response
+    }),
+  "msg.list": publicProcedure
+    .input(
+      z.object({
+        name: z.string().nullish(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const messages = await db.messages.findMany()
+      const result: Message[] = messages.map((message) => ({
+        desc: message.desc || "",
+      }))
+      return result
+    }),
   greeting: publicProcedure
     // This is the input schema of your procedure
     // 💡 Tip: Try changing this and see type errors on the client straight away
