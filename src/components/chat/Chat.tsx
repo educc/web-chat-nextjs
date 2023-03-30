@@ -2,7 +2,7 @@ import { Message } from "~/models/Message";
 import { trpc } from "~/utils/trpc";
 import { FooterButtons } from "./FooterButtons"
 import { Messages } from "./Messages";
-import { SortButtons, SortType } from "./SortButtons";
+import { SortButtons, SortType, SortTypeOrder } from "./SortButtons";
 
 function Chat() {
   const addMsgMutation = trpc['msg.add'].useMutation();
@@ -13,14 +13,19 @@ function Chat() {
   const messages: Message[] = messagesResult.data
 
   const onMsgSubmit = (msg: string) => {
-
     addMsgMutation.mutate({ desc: msg })
   }
 
 
-  const onSortChange = (e: SortType) => {
-
+  const onSortChange = (sortType: SortType, order: SortTypeOrder) => {
+    console.log(sortType, order)
   }
+
+  if (addMsgMutation.isSuccess) {
+    messagesResult.refetch();
+  }
+
+
 
   return (
     <div className="bg-slate-200 flex flex-col h-full">

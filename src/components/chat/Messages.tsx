@@ -13,7 +13,7 @@ function Messages({ messages, className }: IProps) {
 
   return (
     <section className={className}>
-      <div className="p-4">
+      <div className="p-4 h-full flex flex-col flex-col-reverse gap-4">
         {messages.map((msg, i) => (
           <MessageItem key={i} {...msg} />
         ))}
