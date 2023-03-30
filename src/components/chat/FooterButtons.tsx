@@ -14,6 +14,7 @@ function FooterButtons({ onSubmit }: IProps) {
     setMessage('')
   }
 
+
   return (
     <footer>
       <form

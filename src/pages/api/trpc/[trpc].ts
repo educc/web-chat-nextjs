@@ -29,6 +29,7 @@ const appRouter = router({
       const messages = await db.messages.findMany()
       const result: Message[] = messages.map((message) => ({
         desc: message.desc || "",
+        createdAt: message.createdAt.toISOString()
       }))
       return result
     }),

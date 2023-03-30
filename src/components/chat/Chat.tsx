@@ -1,7 +1,8 @@
 import { Message } from "~/models/Message";
 import { trpc } from "~/utils/trpc";
-import { FooterButtons } from "./FootButtons"
+import { FooterButtons } from "./FooterButtons"
 import { Messages } from "./Messages";
+import { SortButtons, SortType } from "./SortButtons";
 
 function Chat() {
   const addMsgMutation = trpc['msg.add'].useMutation();
@@ -16,12 +17,15 @@ function Chat() {
     addMsgMutation.mutate({ desc: msg })
   }
 
+
+  const onSortChange = (e: SortType) => {
+
+  }
+
   return (
     <div className="bg-slate-200 flex flex-col h-full">
       {addMsgMutation.error && <p>Something went wrong! {addMsgMutation.error.message}</p>}
-      <div>
-        header
-      </div>
+      <SortButtons onSubmit={onSortChange} />
       <Messages
         className="grow"
         messages={messages} />
