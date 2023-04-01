@@ -16,10 +16,10 @@ function FooterButtons({ onSubmit }: IProps) {
 
 
   return (
-    <footer>
+    <footer className="h-24 bg-white  z-10">
       <form
         onSubmit={onSubmitForm}
-        className="flex gap-4 p-4 bg-white">
+        className="flex gap-4 p-4 h-full">
         <input
           className="grow h-full p-4 border-slate-400 border-2"
           value={message}

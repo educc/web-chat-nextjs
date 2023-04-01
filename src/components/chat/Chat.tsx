@@ -12,13 +12,15 @@ interface ISearch {
 }
 
 function Chat() {
-  const [search, setSearch] = useState({
+  const [search, setSearch] = useState<ISearch>({
     sortingBy: SortType.ByCreatedAt,
     order: SortTypeOrder.Descending
   })
   const addMsgMutation = trpc['msg.add'].useMutation();
   const deleteMutation = trpc['msg.delete'].useMutation();
   const messagesResult = trpc['msg.list'].useQuery(search);
+
+
 
   if (!messagesResult.data) { return <p>Loading</p> }
 
@@ -44,7 +46,7 @@ function Chat() {
   }
 
   return (
-    <div className="bg-slate-200 flex flex-col h-full">
+    <div className="bg-slate-200 flex flex-col h-full relative">
       {addMsgMutation.error && <p>Something went wrong! {addMsgMutation.error.message}</p>}
       <SortButtons
         order={search.order}
@@ -52,8 +54,9 @@ function Chat() {
         onSubmit={onSortChange} />
       <Messages
         onDelete={onDelete}
-        className="grow"
+        className="absolute h-full w-full pt-20 pb-24  z-0"
         messages={messages} />
+      <span className="grow" />
       <FooterButtons onSubmit={onMsgSubmit} />
     </div>
   )

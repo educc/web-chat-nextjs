@@ -20,7 +20,7 @@ function Messages({ messages, className, onDelete }: IProps) {
 
   return (
     <section className={className}>
-      <div className="p-4 h-full flex flex-col flex-col-reverse gap-4 overscroll-y-auto">
+      <div className="p-4 h-full flex flex-col flex-col-reverse gap-4 overflow-auto">
         {messages.map((msg, i) => (
           <MessageItem key={i}
             onDelete={onDelete}
