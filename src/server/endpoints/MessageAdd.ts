@@ -14,6 +14,5 @@ export const addMessage = publicProcedure
     await db.messages.create({
       data: { desc: input.desc }
     })
-    const response: ApiResponse = { success: true }
-    return response
+    return { success: true } as ApiResponse
   })

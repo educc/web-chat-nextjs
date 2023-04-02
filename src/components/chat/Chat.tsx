@@ -18,13 +18,17 @@ function Chat() {
   })
   const addMsgMutation = trpc['msg.add'].useMutation();
   const deleteMutation = trpc['msg.delete'].useMutation();
-  const messagesResult = trpc['msg.list'].useQuery(search);
-
-
+  const messagesResult = trpc['msg.list'].useInfiniteQuery(
+    search,
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  );
 
   if (!messagesResult.data) { return <p>Loading</p> }
 
-  const messages: Message[] = messagesResult.data
+  const messages: Message[] = messagesResult.data.pages.reduce(
+    (acc, page) => acc.concat(page.messages), [] as Message[])
 
   const onMsgSubmit = (msg: string) => {
     addMsgMutation.mutate({ desc: msg })
@@ -53,6 +57,7 @@ function Chat() {
         sortType={search.sortingBy}
         onSubmit={onSortChange} />
       <Messages
+        fetchMoreData={messagesResult.fetchNextPage}
         onDelete={onDelete}
         className="absolute h-full w-full pt-20 pb-24  z-0"
         messages={messages} />
