@@ -55,7 +55,7 @@ function MessageItem({ msg, onDelete }: IItemProps) {
         {msg.desc}
         <button onClick={() => onDelete(msg.id)}>🗑️</button>
       </span>
-      {msg.imageUrl && <img src={msg.imageUrl} className="w-32 h-32" />}
+      {msg.imageUrl && <img src={msg.imageUrl} className="h-32" />}
       <p className="p-2 text-xs text-slate-400">
         {dayjs(msg.createdAt).fromNow()}
       </p>

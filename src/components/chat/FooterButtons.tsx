@@ -38,10 +38,15 @@ function FooterButtons({ onSubmit }: IProps) {
           onChange={(e) => setMessage(e.target.value)}
           type="text" />
         <label
-          className="p-4 bg-blue-700 text-white"
+          className="p-4 bg-blue-700 text-white relative"
           htmlFor="upload-photo"
         >
           📎
+          {uploadedFile && (
+            <span className="absolute top-0 right-0 bg-red-700 text-white rounded-full w-4 h-4 flex items-center justify-center">
+              1
+            </span>
+          )}
         </label>
         <input
           id="upload-photo"

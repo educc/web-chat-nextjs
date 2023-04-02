@@ -39,16 +39,27 @@ interface UploadResult {
 
 async function uploadToS3(fileBase64: string | undefined): Promise<UploadResult | undefined> {
   if (!fileBase64) { return undefined }
-  const file = Buffer.from(fileBase64, 'base64');
+
+  const { content, base64 } = extractContentAndBase64(fileBase64);
+
+  const file = Buffer.from(base64, 'base64');
   const filename = uuid();
   const uploadCommand = new PutObjectCommand({
     Bucket: 'aerialops',
     Key: filename,
     Body: file,
+    ContentType: content
+
   });
   const uploadResult: PutObjectCommandOutput = await client.send(uploadCommand);
   return {
     awsFileKey: filename,
     uploadResult
   };
+}
+
+function extractContentAndBase64(fileBase64: string): { content: string, base64: string } {
+  const content = fileBase64.split(';base64,')[0];
+  const base64 = fileBase64.split(';base64,')[1];
+  return { content, base64 }
 }
