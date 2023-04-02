@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Message } from "~/models/Message";
+import { Message, MessageResponse } from "~/models/Message";
 import { trpc } from "~/utils/trpc";
 import { SortTypeOrder, SortType } from "~/models/Sorts";
 import { FooterButtons } from "./FooterButtons"
@@ -27,11 +27,14 @@ function Chat() {
 
   if (!messagesResult.data) { return <p>Loading</p> }
 
-  const messages: Message[] = messagesResult.data.pages.reduce(
-    (acc, page) => acc.concat(page.messages), [] as Message[])
+  const messages: MessageResponse[] = messagesResult.data.pages.reduce(
+    (acc, page) => acc.concat(page.messages), [] as MessageResponse[])
 
-  const onMsgSubmit = (msg: string) => {
-    addMsgMutation.mutate({ desc: msg })
+  const onMsgSubmit = (msg: string, imageBase64: string | undefined) => {
+    addMsgMutation.mutate({
+      desc: msg,
+      imgBase64: imageBase64
+    })
   }
 
 

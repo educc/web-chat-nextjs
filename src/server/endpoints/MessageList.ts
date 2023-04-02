@@ -1,9 +1,15 @@
 import { messages } from '@prisma/client';
 import { z } from 'zod';
-import { Message, MessageList } from '~/models/Message';
+import { Message, MessageList, MessageResponse } from '~/models/Message';
 import { SortType, SortTypeOrder } from '~/models/Sorts';
 import { db } from '~/server/db';
 import { publicProcedure } from '~/server/trpc';
+import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+const client = new S3Client({
+  region: "us-east-1"
+});
 
 const LIMIT = 10
 
@@ -33,13 +39,26 @@ export const listMessage = publicProcedure
       nextCursor = nextItem!.id;
     }
 
-    // [2] transform results
+    // [2] get signed url
+    const allKeys = messageList
+      .filter((m) => m.imgS3Key)
+      .map((m) => m.imgS3Key as string) || []
 
-    const result: Message[] = messageList.map((message) => ({
-      desc: message.desc || "",
-      createdAt: message.createdAt.toISOString(),
-      id: message.id
-    }))
+    const signedUrlMap = await getSignedFileUrlForAll(allKeys);
+
+    // [3] transform results
+
+    const result: MessageResponse[] = messageList.map((message) => {
+      const imageUrl = message.imgS3Key ?
+        signedUrlMap.get(message.imgS3Key as string) : undefined
+
+      return {
+        desc: message.desc || "",
+        createdAt: message.createdAt.toISOString(),
+        id: message.id,
+        imageUrl
+      }
+    })
 
     return {
       messages: result,
@@ -70,4 +89,30 @@ async function find(input: Request): Promise<messages[]> {
     cursor: myCursor,
     orderBy: [orderBy]
   })
+}
+
+async function getSignedFileUrlForAll(keys: string[]): Promise<Map<string, string>> {
+  const allPromises = keys.map(async (key) => {
+    const signedUrl = await getSignedFileUrl(key);
+    return [key, signedUrl];
+  })
+
+  const allSignedUrls = await Promise.all(allPromises);
+  return allSignedUrls.reduce((map, [key, signedUrl]) => {
+    map.set(key, signedUrl);
+    return map;
+  }, new Map<string, string>());
+}
+
+
+
+async function getSignedFileUrl(key: string) {
+  const expireIn24h = 60 * 60 * 24;
+  const command = new GetObjectCommand({
+    Bucket: "aerialops",
+    Key: key,
+  });
+
+  // await the signed URL and return it
+  return await getSignedUrl(client, command, { expiresIn: expireIn24h });
 }

@@ -1,5 +1,5 @@
 import dayjs from "dayjs"
-import { Message } from "~/models/Message"
+import { MessageResponse } from "~/models/Message"
 import relativeTime from "dayjs/plugin/relativeTime"
 import styles from './Messages.module.css'
 import InfiniteScroll from "react-infinite-scroll-component"
@@ -7,14 +7,14 @@ import InfiniteScroll from "react-infinite-scroll-component"
 dayjs.extend(relativeTime)
 
 interface IProps {
-  messages: Message[],
+  messages: MessageResponse[],
   className?: string,
   onDelete(id: string): void
   fetchMoreData(): void
 }
 
 interface IItemProps {
-  msg: Message
+  msg: MessageResponse
   onDelete(id: string): void
 }
 
@@ -55,6 +55,7 @@ function MessageItem({ msg, onDelete }: IItemProps) {
         {msg.desc}
         <button onClick={() => onDelete(msg.id)}>🗑️</button>
       </span>
+      {msg.imageUrl && <img src={msg.imageUrl} className="w-32 h-32" />}
       <p className="p-2 text-xs text-slate-400">
         {dayjs(msg.createdAt).fromNow()}
       </p>

@@ -13,5 +13,6 @@ datasource db {
 model messages {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   desc      String?
+  imgS3Key  String?
   createdAt DateTime @default(now())
 }
