@@ -1,11 +1,12 @@
 import { messages } from '@prisma/client';
 import { z } from 'zod';
-import { Message, MessageList, MessageResponse } from '~/models/Message';
+import { MessageList, MessageResponse } from '~/models/Message';
 import { SortType, SortTypeOrder } from '~/models/Sorts';
 import { db } from '~/server/db';
 import { publicProcedure } from '~/server/trpc';
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { ApiResponse } from '~/models/ApiResponse';
 
 const client = new S3Client({
   region: "us-east-1"
@@ -30,41 +31,53 @@ export const listMessage = publicProcedure
     }),
   )
   .query(async ({ input }) => {
-    // [1] find results
-    const messageList = await find(input)
-
-    let nextCursor: typeof input.cursor | undefined = undefined;
-    if (messageList.length > LIMIT) {
-      const nextItem = messageList.pop()
-      nextCursor = nextItem!.id;
+    try {
+      return await getMessageList(input)
+    } catch (ex) {
+      return { success: false }
     }
+  })
 
-    // [2] get signed url
-    const allKeys = messageList
-      .filter((m) => m.imgS3Key)
-      .map((m) => m.imgS3Key as string) || []
+async function getMessageList(input: Request): Promise<ApiResponse<MessageList>> {
+  // [1] find results
+  const messageList = await find(input)
 
-    const signedUrlMap = await getSignedFileUrlForAll(allKeys);
+  let nextCursor: typeof input.cursor | undefined = undefined;
+  if (messageList.length > LIMIT) {
+    const nextItem = messageList.pop()
+    nextCursor = nextItem!.id;
+  }
 
-    // [3] transform results
+  // [2] get signed url
+  const allKeys = messageList
+    .filter((m) => m.imgS3Key)
+    .map((m) => m.imgS3Key as string) || []
 
-    const result: MessageResponse[] = messageList.map((message) => {
-      const imageUrl = message.imgS3Key ?
-        signedUrlMap.get(message.imgS3Key as string) : undefined
+  const signedUrlMap = await getSignedFileUrlForAll(allKeys);
 
-      return {
-        desc: message.desc || "",
-        createdAt: message.createdAt.toISOString(),
-        id: message.id,
-        imageUrl
-      }
-    })
+  // [3] transform results
+
+  const result: MessageResponse[] = messageList.map((message) => {
+    const imageUrl = message.imgS3Key ?
+      signedUrlMap.get(message.imgS3Key as string) : undefined
 
     return {
-      messages: result,
-      nextCursor: nextCursor
-    } as MessageList
+      desc: message.desc || "",
+      createdAt: message.createdAt.toISOString(),
+      id: message.id,
+      imageUrl
+    }
   })
+
+  const response: ApiResponse<MessageList> = {
+    success: true,
+    data: {
+      messages: result,
+      nextCursor
+    }
+  }
+  return response
+}
 
 async function find(input: Request): Promise<messages[]> {
   const { cursor } = input;

@@ -14,5 +14,5 @@ export const deleteMessage = publicProcedure
     await db.messages.delete({
       where: { id: input.id }
     })
-    return { success: true } as ApiResponse
+    return { success: true }
   })

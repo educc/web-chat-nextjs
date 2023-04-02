@@ -25,10 +25,10 @@ export const addMessage = publicProcedure
       })
 
       //I am assuming everything is OK
-      return { success: true } as ApiResponse
+      return { success: true }
     } catch (ex) {
       console.error("At adding new message", ex)
-      return { success: false } as ApiResponse
+      return { success: false }
     }
   })
 

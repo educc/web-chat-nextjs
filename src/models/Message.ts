@@ -14,5 +14,5 @@ export interface MessageResponse {
 
 export interface MessageList {
   messages: MessageResponse[];
-  nextCursor: string;
+  nextCursor?: string;
 }

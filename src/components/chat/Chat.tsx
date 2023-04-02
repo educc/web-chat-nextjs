@@ -21,14 +21,14 @@ function Chat() {
   const messagesResult = trpc['msg.list'].useInfiniteQuery(
     search,
     {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      getNextPageParam: (lastPage) => lastPage.data?.nextCursor,
     }
   );
 
   if (!messagesResult.data) { return <p>Loading</p> }
 
   const messages: MessageResponse[] = messagesResult.data.pages.reduce(
-    (acc, page) => acc.concat(page.messages), [] as MessageResponse[])
+    (acc, page) => acc.concat(page.data?.messages || []), [] as MessageResponse[])
 
   const onMsgSubmit = (msg: string, imageBase64: string | undefined) => {
     addMsgMutation.mutate({
