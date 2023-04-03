@@ -24,9 +24,8 @@ function Messages({ messages, className, fetchMoreData, onDelete }: IProps) {
     <section className={className}>
       <div
         id="scrollableDiv"
-        className="h-full overflow-auto bg-red-slate-200 z-20 flex flex-col flex-col-reverse"
+        className="h-full overflow-auto z-20 flex flex-col flex-col-reverse"
       >
-        {/*Put the scroll bar always on the bottom*/}
         <InfiniteScroll
           dataLength={messages.length}
           next={fetchMoreData}

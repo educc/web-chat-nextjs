@@ -11,6 +11,12 @@ interface ISearch {
   order: SortTypeOrder
 }
 
+interface IChatMessages {
+  fetchNextPage: any,
+  onDelete: (id: string) => void,
+  messages: MessageResponse[]
+}
+
 function Chat() {
   const [search, setSearch] = useState<ISearch>({
     sortingBy: SortType.ByCreatedAt,
@@ -24,11 +30,13 @@ function Chat() {
       getNextPageParam: (lastPage) => lastPage.data?.nextCursor,
     }
   );
+  //if (messagesResult.isLoading) return <Loading />;
 
-  if (!messagesResult.data) { return <p>Loading</p> }
-
-  const messages: MessageResponse[] = messagesResult.data.pages.reduce(
-    (acc, page) => acc.concat(page.data?.messages || []), [] as MessageResponse[])
+  const messages: MessageResponse[] = (() => {
+    if (!messagesResult.data) return [];
+    return messagesResult.data.pages.reduce(
+      (acc, page) => acc.concat(page.data?.messages || []), [] as MessageResponse[])
+  })();
 
   const onMsgSubmit = (msg: string, imageBase64: string | undefined) => {
     addMsgMutation.mutate({
@@ -59,15 +67,33 @@ function Chat() {
         order={search.order}
         sortType={search.sortingBy}
         onSubmit={onSortChange} />
-      <Messages
-        fetchMoreData={messagesResult.fetchNextPage}
+      <ChatMessages
+        fetchNextPage={messagesResult.fetchNextPage}
+        messages={messages}
         onDelete={onDelete}
-        className="absolute h-full w-full pt-20 pb-24  z-0"
-        messages={messages} />
+      />
       <span className="grow" />
       <FooterButtons onSubmit={onMsgSubmit} />
     </div>
   )
 }
 
+function Loading() {
+  return <p className="flex justify-center items-center text-xl">Loading...</p>
+}
+
+function ChatMessages({
+  fetchNextPage,
+  messages,
+  onDelete
+}: IChatMessages) {
+  return <Messages
+    fetchMoreData={fetchNextPage}
+    onDelete={onDelete}
+    className="absolute h-full w-full pt-20 pb-24  z-0"
+    messages={messages} />;
+}
+
+
 export { Chat }
+
