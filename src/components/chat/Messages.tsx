@@ -11,6 +11,7 @@ interface IProps {
   className?: string,
   onDelete(id: string): void
   fetchMoreData(): void
+  hasMore?: boolean
 }
 
 interface IItemProps {
@@ -18,7 +19,7 @@ interface IItemProps {
   onDelete(id: string): void
 }
 
-function Messages({ messages, className, fetchMoreData, onDelete }: IProps) {
+function Messages({ messages, className, hasMore, fetchMoreData, onDelete }: IProps) {
 
   return (
     <section className={className}>
@@ -31,9 +32,10 @@ function Messages({ messages, className, fetchMoreData, onDelete }: IProps) {
           next={fetchMoreData}
           className="px-4 flex flex-col-reverse"
           style={{ overflow: "hidden", height: "100%" }}
-          inverse={true} //
-          hasMore={true}
+          inverse={true}
+          hasMore={hasMore || false}
           loader={<Loading />}
+          endMessage={<NoMoreMessage />}
           scrollableTarget="scrollableDiv"
         >
           {messages.map((msg, i) => (
@@ -64,6 +66,10 @@ function MessageItem({ msg, onDelete }: IItemProps) {
 
 function Loading() {
   return <p className="text-center text-slate-400 text-sm p-4">Loading...</p>
+}
+
+function NoMoreMessage() {
+  return <p className="text-center text-slate-400 text-sm p-4">No more messages</p>
 }
 
 export { Messages }

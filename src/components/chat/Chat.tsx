@@ -67,33 +67,17 @@ function Chat() {
         order={search.order}
         sortType={search.sortingBy}
         onSubmit={onSortChange} />
-      <ChatMessages
-        fetchNextPage={messagesResult.fetchNextPage}
-        messages={messages}
+      <Messages
+        fetchMoreData={messagesResult.fetchNextPage}
         onDelete={onDelete}
-      />
+        hasMore={messagesResult.hasNextPage}
+        className="absolute h-full w-full pt-20 pb-24  z-0"
+        messages={messages} />
       <span className="grow" />
       <FooterButtons onSubmit={onMsgSubmit} />
     </div>
   )
 }
-
-function Loading() {
-  return <p className="flex justify-center items-center text-xl">Loading...</p>
-}
-
-function ChatMessages({
-  fetchNextPage,
-  messages,
-  onDelete
-}: IChatMessages) {
-  return <Messages
-    fetchMoreData={fetchNextPage}
-    onDelete={onDelete}
-    className="absolute h-full w-full pt-20 pb-24  z-0"
-    messages={messages} />;
-}
-
 
 export { Chat }
 
